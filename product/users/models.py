@@ -10,12 +10,12 @@ class CustomUser(AbstractUser):
         unique=True
     )
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = (
+    REQUIRED_FIELDS = [
         'username',
         'first_name',
         'last_name',
         'password'
-    )
+    ]
 
     class Meta:
         verbose_name = 'Пользователь'

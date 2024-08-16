@@ -17,8 +17,12 @@ class Course(models.Model):
         auto_now_add=False,
         verbose_name='Дата и время начала курса'
     )
+    worth = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        verbose_name='Стоимость'
+    )
 
-    # TODO
 
     class Meta:
         verbose_name = 'Курс'

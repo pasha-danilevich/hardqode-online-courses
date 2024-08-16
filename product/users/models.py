@@ -1,6 +1,8 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+from configuration import settings
+
 class CustomUser(AbstractUser):
     """Кастомная модель пользователя - студента."""
 
@@ -40,10 +42,25 @@ class Balance(models.Model):
 class Subscription(models.Model):
     """Модель подписки пользователя на курс."""
 
-    # TODO
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,  # Связываем с кастомной моделью пользователя
+        on_delete=models.CASCADE,
+        verbose_name='Пользователь'
+    )
+    course = models.ForeignKey(
+        'courses.Course',
+        on_delete=models.CASCADE,
+        verbose_name='Курс'
+    )
+    subscription_date = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата подписки'
+    )
 
     class Meta:
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
-        ordering = ('-id',)
+        ordering = ('-subscription_date',)  # Сортировка по дате подписки
 
+    def __str__(self):
+        return f"{self.user.username} подписан на {self.course.title}"

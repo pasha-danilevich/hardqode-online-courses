@@ -36,6 +36,7 @@ class Balance(models.Model):
     
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
+        related_name='balance',
         on_delete=models.CASCADE,
         verbose_name='Пользователь'
     )
@@ -65,7 +66,15 @@ class Balance(models.Model):
 
 
 class Subscription(models.Model):
-    """Модель подписки пользователя на курс."""
+    """
+    Модель подписки пользователя на курс.
+
+    Атрибуты:
+        user (ForeignKey): Пользователь, связанный с подпиской.
+        course (ForeignKey): Курс, на который оформлена подписка.
+        subscription_date (DateTimeField): Дата и время создания подписки.
+        group (OneToOneField): Группа, связанная с подпиской.
+    """
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,  # Связываем с кастомной моделью пользователя

@@ -80,10 +80,10 @@ class Subscription(models.Model):
     Модель подписки пользователя на курс.
 
     Атрибуты:
-        user (ForeignKey): Пользователь, связанный с подпиской.
-        course (ForeignKey): Курс, на который оформлена подписка.
-        subscription_date (DateTimeField): Дата и время создания подписки.
-        group (OneToOneField): Группа, связанная с подпиской.
+    - user (ForeignKey): Пользователь, связанный с подпиской.
+    - course (ForeignKey): Курс, на который оформлена подписка.
+    - subscription_date (DateTimeField): Дата и время создания подписки.
+    - group (OneToOneField): Группа, связанная с подпиской.
     """
 
     user = models.ForeignKey(
@@ -106,11 +106,13 @@ class Subscription(models.Model):
         'courses.Group',
         related_name='subscriptions',
         on_delete=models.CASCADE,
-        verbose_name='Группа'
+        verbose_name='Группа',
+        null=True
     )
     
     user: 'models.ForeignKey[CustomUser]'
     course: 'models.ForeignKey[Course]'
+    group: 'models.OneToOneField[Group] | models.OneToOneField[None]'
 
     class Meta:
         verbose_name = 'Подписка'

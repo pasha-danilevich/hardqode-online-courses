@@ -1,4 +1,5 @@
 from decimal import Decimal
+from typing import Iterable
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.core.exceptions import ValidationError
@@ -21,6 +22,7 @@ class CustomUser(AbstractUser):
         'last_name',
         'password'
     ]
+    balance: 'Balance'
 
     class Meta:
         verbose_name = 'Пользователь'
@@ -29,6 +31,14 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.get_full_name()
+    
+    def save(self, *args, **kwargs):
+        """Создает баланс при сохранении пользователя."""
+        super().save(*args, **kwargs)
+        
+        # Создаем баланс только если он еще не существует
+        if not hasattr(self, 'balance'):
+            Balance.objects.create(user=self)
 
 
 class Balance(models.Model):

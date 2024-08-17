@@ -84,12 +84,6 @@ class Group(models.Model):
         on_delete=models.CASCADE,
         verbose_name='Курс'
     )
-    subscription = models.OneToOneField(
-        'users.Subscription',
-        related_name='groups',
-        on_delete=models.CASCADE,
-        verbose_name='Подписка пользователя'
-    )
 
     class Meta:
         verbose_name = 'Группа'

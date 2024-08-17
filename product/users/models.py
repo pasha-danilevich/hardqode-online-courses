@@ -83,6 +83,12 @@ class Subscription(models.Model):
         auto_now_add=True,
         verbose_name='Дата подписки'
     )
+    group = models.OneToOneField(
+        'courses.Group',
+        related_name='subscriptions',
+        on_delete=models.CASCADE,
+        verbose_name='Группа'
+    )
     
     user: 'models.ForeignKey[CustomUser]'
     course: 'models.ForeignKey[Course]'

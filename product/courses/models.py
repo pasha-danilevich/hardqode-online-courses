@@ -31,6 +31,7 @@ class Course(models.Model):
 
     lessons: 'models.QuerySet[Lesson]'
     subscriptions: 'models.QuerySet[Subscription]'
+    groups: 'models.QuerySet[Group]'
 
     class Meta:
         verbose_name = 'Курс'

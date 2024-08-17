@@ -11,8 +11,9 @@ from api.v1.serializers.course_serializer import (CourseSerializer,
                                                   GroupSerializer,
                                                   LessonSerializer)
 from api.v1.serializers.user_serializer import SubscriptionSerializer
-from courses.models import Course
+from courses.models import Course, Lesson
 from users.models import Subscription
+from django.db.models import Prefetch
 
 
 class LessonViewSet(viewsets.ModelViewSet):
@@ -53,10 +54,23 @@ class GroupViewSet(viewsets.ModelViewSet):
         return course.groups.all()
 
 
+# GET /api/v1/courses/: Получить список всех курсов.
+# POST /api/v1/courses/: Создать новый курс.
+# GET /api/v1/courses/{id}/: Получить информацию о конкретном курсе.
+# PUT /api/v1/courses/{id}/: Обновить информацию о конкретном курсе.
+# DELETE /api/v1/courses/{id}/: Удалить курс.
+# POST /api/v1/courses/{id}/pay/: Купить доступ к курсу (подписка на курс).
+
 class CourseViewSet(viewsets.ModelViewSet):
     """Курсы """
 
-    queryset = Course.objects.all()
+    queryset = Course.objects.prefetch_related(
+        Prefetch(
+            'lessons', 
+            queryset=Lesson.objects.all()
+        )
+    ).all()
+    
     permission_classes = (ReadOnlyOrIsAdmin,)
 
     def get_serializer_class(self):

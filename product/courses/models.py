@@ -1,5 +1,5 @@
 from django.db import models
-
+from configuration import settings
 from users.models import Subscription
 
 
@@ -68,8 +68,18 @@ class Lesson(models.Model):
 
 class Group(models.Model):
     """Модель группы."""
-
-    # TODO
+    course = models.ForeignKey(
+        'courses.Course',
+        related_name='groups',
+        on_delete=models.CASCADE,
+        verbose_name='Курс'
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name='course_groups',
+        on_delete=models.CASCADE,
+        verbose_name='Пользователь'
+    )
 
     class Meta:
         verbose_name = 'Группа'

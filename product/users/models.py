@@ -4,6 +4,7 @@ from django.db import models
 from django.core.exceptions import ValidationError
 
 from configuration import settings
+from product.courses.models import Course
 
 class CustomUser(AbstractUser):
     """Кастомная модель пользователя - студента."""
@@ -44,6 +45,8 @@ class Balance(models.Model):
         default=Decimal('1000.00'),
         verbose_name='Баланс'
     )
+    
+    user: 'models.OneToOneField[CustomUser]'
 
     class Meta:
         verbose_name = 'Баланс'
@@ -77,6 +80,9 @@ class Subscription(models.Model):
         auto_now_add=True,
         verbose_name='Дата подписки'
     )
+    
+    user: 'models.ForeignKey[CustomUser]'
+    course: 'models.ForeignKey[Course]'
 
     class Meta:
         verbose_name = 'Подписка'

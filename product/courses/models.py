@@ -42,10 +42,13 @@ class Lesson(models.Model):
     )
     link = models.URLField(
         max_length=250,
-        verbose_name='Ссылка',
+        verbose_name='Ссылка на видео',
     )
-
-    # TODO
+    course = models.ForeignKey(
+        'courses.Course',
+        on_delete=models.CASCADE,
+        verbose_name='Курс'
+    )
 
     class Meta:
         verbose_name = 'Урок'

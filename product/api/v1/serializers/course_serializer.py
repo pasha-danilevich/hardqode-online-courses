@@ -108,7 +108,7 @@ class CourseSerializer(serializers.ModelSerializer):
             'author',
             'title',
             'start_date',
-            'price',
+            'worth',
             'lessons_count',
             'lessons',
             'demand_course_percent',

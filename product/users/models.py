@@ -4,7 +4,7 @@ from django.db import models
 from django.core.exceptions import ValidationError
 
 from configuration import settings
-from product.courses.models import Course
+from courses.models import *
 
 class CustomUser(AbstractUser):
     """Кастомная модель пользователя - студента."""
@@ -47,6 +47,7 @@ class Balance(models.Model):
     )
     
     user: 'models.OneToOneField[CustomUser]'
+    subscriptions: 'models.QuerySet[Subscription]'
 
     class Meta:
         verbose_name = 'Баланс'
@@ -68,11 +69,13 @@ class Subscription(models.Model):
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,  # Связываем с кастомной моделью пользователя
+        related_name='subscriptions',
         on_delete=models.CASCADE,
         verbose_name='Пользователь'
     )
     course = models.ForeignKey(
         'courses.Course',
+        related_name='subscriptions',
         on_delete=models.CASCADE,
         verbose_name='Курс'
     )

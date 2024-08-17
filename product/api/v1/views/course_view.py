@@ -36,21 +36,21 @@ class LessonViewSet(viewsets.ModelViewSet):
 
 class GroupViewSet(viewsets.ModelViewSet):
     """Группы."""
+    ...
+    # permission_classes = (permissions.IsAdminUser,)
 
-    permission_classes = (permissions.IsAdminUser,)
+    # def get_serializer_class(self):
+    #     if self.action in ['list', 'retrieve']:
+    #         return GroupSerializer
+    #     return CreateGroupSerializer
 
-    def get_serializer_class(self):
-        if self.action in ['list', 'retrieve']:
-            return GroupSerializer
-        return CreateGroupSerializer
+    # def perform_create(self, serializer):
+    #     course = get_object_or_404(Course, id=self.kwargs.get('course_id'))
+    #     serializer.save(course=course)
 
-    def perform_create(self, serializer):
-        course = get_object_or_404(Course, id=self.kwargs.get('course_id'))
-        serializer.save(course=course)
-
-    def get_queryset(self):
-        course = get_object_or_404(Course, id=self.kwargs.get('course_id'))
-        return course.groups.all()
+    # def get_queryset(self):
+    #     course = get_object_or_404(Course, id=self.kwargs.get('course_id'))
+    #     return course.groups.all()
 
 
 class CourseViewSet(viewsets.ModelViewSet):
@@ -73,7 +73,7 @@ class CourseViewSet(viewsets.ModelViewSet):
         """Покупка доступа к курсу (подписка на курс)."""
 
         # TODO
-
+        data = ...
         return Response(
             data=data,
             status=status.HTTP_201_CREATED

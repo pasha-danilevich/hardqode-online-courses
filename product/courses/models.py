@@ -1,5 +1,7 @@
 from django.db import models
 
+from users.models import Subscription
+
 
 class Course(models.Model):
     """Модель продукта - курса."""
@@ -23,6 +25,8 @@ class Course(models.Model):
         verbose_name='Стоимость'
     )
 
+    lessons: 'models.QuerySet[Lesson]'
+    subscriptions: 'models.QuerySet[Subscription]'
 
     class Meta:
         verbose_name = 'Курс'
@@ -46,9 +50,12 @@ class Lesson(models.Model):
     )
     course = models.ForeignKey(
         'courses.Course',
+        related_name='lessons',
         on_delete=models.CASCADE,
         verbose_name='Курс'
     )
+    
+    course: 'models.ForeignKey[Course]'
 
     class Meta:
         verbose_name = 'Урок'

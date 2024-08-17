@@ -85,9 +85,11 @@ class CourseSerializer(serializers.ModelSerializer):
     groups_filled_percent = serializers.SerializerMethodField(read_only=True)
     demand_course_percent = serializers.SerializerMethodField(read_only=True)
 
-    def get_lessons_count(self, obj):
+    def get_lessons_count(self, obj: Course) -> int:
         """Количество уроков в курсе."""
-        # TODO Доп. задание
+        return obj.lessons.count()
+        
+        
 
     def get_students_count(self, obj):
         """Общее количество студентов на курсе."""

@@ -73,17 +73,22 @@ class Lesson(models.Model):
 
 class Group(models.Model):
     """Модель группы."""
+    
+    title = models.CharField(
+        max_length=250,
+        verbose_name='Название',
+    )
     course = models.ForeignKey(
         'courses.Course',
         related_name='groups',
         on_delete=models.CASCADE,
         verbose_name='Курс'
     )
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        related_name='course_groups',
+    subscription = models.OneToOneField(
+        'users.Subscription',
+        related_name='groups',
         on_delete=models.CASCADE,
-        verbose_name='Пользователь'
+        verbose_name='Подписка пользователя'
     )
 
     class Meta:

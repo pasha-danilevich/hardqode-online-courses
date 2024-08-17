@@ -24,6 +24,10 @@ class Course(models.Model):
         decimal_places=2,
         verbose_name='Стоимость'
     )
+    available = models.BooleanField(
+        default=True, 
+        verbose_name='Доступен'
+    )
 
     lessons: 'models.QuerySet[Lesson]'
     subscriptions: 'models.QuerySet[Subscription]'

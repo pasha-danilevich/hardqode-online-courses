@@ -4,7 +4,7 @@ from rest_framework import serializers
 from django.db.models import Prefetch
 
 from courses.models import Course, Group, Lesson
-from users.models import Subscription, SubscriptionGroup
+from users.models import CustomUser, Subscription, SubscriptionGroup
 
 User = get_user_model()
 
@@ -79,6 +79,10 @@ class MiniLessonSerializer(serializers.ModelSerializer):
 
 class CourseSerializer(serializers.ModelSerializer):
     """Список курсов."""
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Определяем кол-во пользователей на платформе один раз, чтобы не делать каждий раз запрос при обходе всех куросв
+        self.user_count = CustomUser.objects.count()
 
     lessons = MiniLessonSerializer(many=True, read_only=True)
     lessons_count = serializers.SerializerMethodField(read_only=True)
@@ -88,9 +92,7 @@ class CourseSerializer(serializers.ModelSerializer):
 
     def get_lessons_count(self, obj: Course) -> int:
         """Количество уроков в курсе."""
-        return obj.lessons.count()
-        
-        
+        return obj.lessons.count()      
 
     def get_students_count(self, obj: Course) -> int:
         """Общее количество студентов на курсе."""
@@ -117,12 +119,17 @@ class CourseSerializer(serializers.ModelSerializer):
         
         return round(average_filled_percentage, 1)
     
-    
-
-
-    def get_demand_course_percent(self, obj):
+    def get_demand_course_percent(self, obj: Course):
         """Процент приобретения курса."""
-        # TODO Доп. задание
+        course_access_count = obj.subscriptions.count()  # Количество доступов к продукту
+        
+        if self.user_count > 0:
+            demand_percent = (course_access_count / self.user_count) * 100
+        else:
+            demand_percent = 0  # Если пользователей нет, процент равен 0
+            
+        return round(demand_percent, 1)
+        
 
     class Meta:
         model = Course

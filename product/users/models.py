@@ -23,6 +23,7 @@ class CustomUser(AbstractUser):
         'password'
     ]
     balance: 'Balance'
+    subscriptions: 'models.QuerySet[Subscription]'
 
     class Meta:
         verbose_name = 'Пользователь'

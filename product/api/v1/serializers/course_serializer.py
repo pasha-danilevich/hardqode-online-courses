@@ -54,6 +54,7 @@ class GroupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Group
+        fields = '__all__'
 
 
 class CreateGroupSerializer(serializers.ModelSerializer):
@@ -119,7 +120,7 @@ class CourseSerializer(serializers.ModelSerializer):
         
         return round(average_filled_percentage, 1)
     
-    def get_demand_course_percent(self, obj: Course):
+    def get_demand_course_percent(self, obj: Course) -> float:
         """Процент приобретения курса."""
         course_access_count = obj.subscriptions.count()  # Количество доступов к продукту
         
@@ -152,3 +153,4 @@ class CreateCourseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Course
+        fields = '__all__'

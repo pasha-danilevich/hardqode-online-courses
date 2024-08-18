@@ -113,12 +113,7 @@ class CourseViewSet(viewsets.ModelViewSet):
         """Покупка доступа к курсу (подписка на курс)."""
         user = cast(CustomUser, request.user)
 
-        try:
-            course = Course.objects.get(id=pk)
-        except Course.DoesNotExist:
-            return Response(
-                status=status.HTTP_404_NOT_FOUND
-            )
+        course = get_object_or_404(Course, id=pk)
 
         try:
             with transaction.atomic():

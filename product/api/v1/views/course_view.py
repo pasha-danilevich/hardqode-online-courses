@@ -76,7 +76,11 @@ class CourseViewSet(viewsets.ModelViewSet):
 
     queryset = Course.objects.prefetch_related(
         Prefetch(
-            'lessons',
+            'subscriptions',  # Предзагрузка подписок
+            queryset=Subscription.objects.all()
+        ),
+        Prefetch(
+            'lessons',  # Предзагрузка уроков
             queryset=Lesson.objects.all()
         )
     ).all()

@@ -91,9 +91,9 @@ class CourseSerializer(serializers.ModelSerializer):
         
         
 
-    def get_students_count(self, obj):
+    def get_students_count(self, obj: Course) -> int:
         """Общее количество студентов на курсе."""
-        # TODO Доп. задание
+        return obj.subscriptions.count()
 
     def get_groups_filled_percent(self, obj):
         """Процент заполнения групп, если в группе максимум 30 чел.."""

@@ -92,7 +92,6 @@ class CourseViewSet(viewsets.ModelViewSet):
         ).exclude(
             subscriptions__user=user  # Исключаем курсы, на которые подписан пользователь
         )
-        print(queryset)
 
         return queryset
 

@@ -1,9 +1,10 @@
 from django.contrib.auth import get_user_model
-from django.db.models import Avg, Count
+from django.db.models import Avg, Count, QuerySet
 from rest_framework import serializers
+from django.db.models import Prefetch
 
 from courses.models import Course, Group, Lesson
-from users.models import Subscription
+from users.models import Subscription, SubscriptionGroup
 
 User = get_user_model()
 
@@ -94,10 +95,30 @@ class CourseSerializer(serializers.ModelSerializer):
     def get_students_count(self, obj: Course) -> int:
         """Общее количество студентов на курсе."""
         return obj.subscriptions.count()
+    
+    def _get_sum_subscription(self, groups: QuerySet[Group]) -> int:
+        """Возвращает сумму учеников в группах"""
+        return sum(group.subscriptions_count for group in groups)  # type: ignore
 
-    def get_groups_filled_percent(self, obj):
-        """Процент заполнения групп, если в группе максимум 30 чел.."""
-        # TODO Доп. задание
+    def get_groups_filled_percent(self, obj: Course) -> float:
+        """Средний процент заполненности групп, если максимум 30 чел."""
+    
+        groups = obj.groups.annotate(
+            subscriptions_count=Count('subscriptions_group')
+        ).prefetch_related('subscriptions_group')
+        
+        sum_subscription = self._get_sum_subscription(groups)
+        
+        max_capacity = 30
+        total_groups = len(groups)
+        
+        # Вычисляем средний процент заполненности
+        average_filled_percentage = (sum_subscription / (total_groups * max_capacity) * 100) if total_groups > 0 else 0
+        
+        return round(average_filled_percentage, 1)
+    
+    
+
 
     def get_demand_course_percent(self, obj):
         """Процент приобретения курса."""

@@ -1,6 +1,6 @@
 from django.db import models
 from configuration import settings
-from users.models import Subscription
+from users.models import Subscription, SubscriptionGroup
 
 
 class Course(models.Model):
@@ -84,6 +84,8 @@ class Group(models.Model):
         on_delete=models.CASCADE,
         verbose_name='Курс'
     )
+    
+    subscriptions_group: 'models.QuerySet[SubscriptionGroup]'
 
     class Meta:
         verbose_name = 'Группа'

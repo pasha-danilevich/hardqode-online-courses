@@ -5,7 +5,7 @@ from rest_framework import status, viewsets, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from api.v1.permissions import IsStudentOrIsAdmin, ReadOnlyOrIsAdmin
+from api.v1.permissions import InsufficientFundsError, IsStudentOrIsAdmin, ReadOnlyOrIsAdmin, make_payment
 from api.v1.serializers.course_serializer import (CourseSerializer,
                                                   CreateCourseSerializer,
                                                   CreateGroupSerializer,
@@ -74,11 +74,11 @@ class CourseViewSet(viewsets.ModelViewSet):
 
     queryset = Course.objects.prefetch_related(
         Prefetch(
-            'lessons', 
+            'lessons',
             queryset=Lesson.objects.all()
         )
     ).all()
-    
+
     permission_classes = (ReadOnlyOrIsAdmin,)
 
     def get_serializer_class(self):
@@ -93,8 +93,7 @@ class CourseViewSet(viewsets.ModelViewSet):
     )
     def pay(self, request, pk):
         """Покупка доступа к курсу (подписка на курс)."""
-        user = cast(CustomUser, request.user)  
-        user_balance = user.balance.amount
+        user = cast(CustomUser, request.user)
 
         try:
             course = Course.objects.get(id=pk)
@@ -102,38 +101,32 @@ class CourseViewSet(viewsets.ModelViewSet):
             return Response(
                 status=status.HTTP_404_NOT_FOUND
             )
-            
-        course_price = course.worth 
 
-        if user_balance < course_price:
+        try:
+            with transaction.atomic():
+                # Создаем подписку
+                obj, created = Subscription.objects.get_or_create(
+                    user=user,
+                    course=course,
+                )
+
+                if not created:
+                    return Response(
+                        data='У вас уже есть данный курс',
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
+                # Списываем деньги
+                make_payment(user=user, course=course)
+
+        except InsufficientFundsError as e:
             return Response(
-                data='У вас недостаточно средств',
+                data=str(e), 
                 status=status.HTTP_402_PAYMENT_REQUIRED
-            )  
-        
-
-        with transaction.atomic():
-             
-            # Создаем подписку
-            obj, created = Subscription.objects.get_or_create(
-                user=user,
-                course=course,
             )
-            
-            if not created:
-                return Response(
-                    data='У вас уже есть данный курс',
-                    status=status.HTTP_400_BAD_REQUEST
-                )  
-            
-            # Списываем деньги
-            
-            user.balance.amount = user_balance - course_price 
-            user.balance.save() 
-              
-   
-        data = f'Вы успешно приобрели курс {course.title} за {course_price}. Текущий баланс {user.balance.amount}'
-        
+
+        data = f'Вы успешно приобрели курс {course.title} за {course.worth}. Текущий баланс {user.balance.amount}'
+
         return Response(
             data=data,
             status=status.HTTP_201_CREATED

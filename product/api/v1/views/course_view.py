@@ -1,3 +1,4 @@
+from decimal import Decimal
 from typing import cast
 from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets, permissions
@@ -13,10 +14,14 @@ from api.v1.serializers.course_serializer import (CourseSerializer,
                                                   LessonSerializer)
 from api.v1.serializers.user_serializer import SubscriptionSerializer
 from courses.models import Course, Group, Lesson
-from .services import get_group_with_fewest_subscriptions
-from users.models import Subscription, SubscriptionGroup
+
+from users.models import Subscription
 from django.db.models import Prefetch
 from users.models import CustomUser
+from django.db import transaction
+from django.db.models import F
+from rest_framework.response import Response
+from rest_framework import status
 
 
 class LessonViewSet(viewsets.ModelViewSet):
@@ -99,12 +104,17 @@ class CourseViewSet(viewsets.ModelViewSet):
             )
             
         course_price = course.worth 
+
+        if user_balance < course_price:
+            return Response(
+                data='У вас недостаточно средств',
+                status=status.HTTP_402_PAYMENT_REQUIRED
+            )  
         
-        if user_balance >= course_price:
-            
-            ### надо обернуть в atomic
-            # тут списать деньги
-                
+
+        with transaction.atomic():
+             
+            # Создаем подписку
             obj, created = Subscription.objects.get_or_create(
                 user=user,
                 course=course,
@@ -116,13 +126,13 @@ class CourseViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST
                 )  
             
-        else:
-            return Response(
-                data='У вас недостаточно средств',
-                status=status.HTTP_402_PAYMENT_REQUIRED
-            )   
-        
-        data = f'{user.pk}, {pk}, {course_price}, {user_balance}'
+            # Списываем деньги
+            
+            user.balance.amount = user_balance - course_price 
+            user.balance.save() 
+              
+   
+        data = f'Вы успешно приобрели курс {course.title} за {course_price}. Текущий баланс {user.balance.amount}'
         
         return Response(
             data=data,

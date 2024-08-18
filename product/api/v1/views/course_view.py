@@ -1,3 +1,4 @@
+from typing import cast
 from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets, permissions
 from rest_framework.decorators import action
@@ -11,9 +12,11 @@ from api.v1.serializers.course_serializer import (CourseSerializer,
                                                   GroupSerializer,
                                                   LessonSerializer)
 from api.v1.serializers.user_serializer import SubscriptionSerializer
-from courses.models import Course, Lesson
-from users.models import Subscription
+from courses.models import Course, Group, Lesson
+from .services import get_group_with_fewest_subscriptions
+from users.models import Subscription, SubscriptionGroup
 from django.db.models import Prefetch
+from users.models import CustomUser
 
 
 class LessonViewSet(viewsets.ModelViewSet):
@@ -85,9 +88,42 @@ class CourseViewSet(viewsets.ModelViewSet):
     )
     def pay(self, request, pk):
         """Покупка доступа к курсу (подписка на курс)."""
+        user = cast(CustomUser, request.user)  
+        user_balance = user.balance.amount
 
-        # TODO
-        data = ...
+        try:
+            course = Course.objects.get(id=pk)
+        except Course.DoesNotExist:
+            return Response(
+                status=status.HTTP_404_NOT_FOUND
+            )
+            
+        course_price = course.worth 
+        
+        if user_balance >= course_price:
+            
+            ### надо обернуть в atomic
+            # тут списать деньги
+                
+            obj, created = Subscription.objects.get_or_create(
+                user=user,
+                course=course,
+            )
+            
+            if not created:
+                return Response(
+                    data='У вас уже есть данный курс',
+                    status=status.HTTP_400_BAD_REQUEST
+                )  
+            
+        else:
+            return Response(
+                data='У вас недостаточно средств',
+                status=status.HTTP_402_PAYMENT_REQUIRED
+            )   
+        
+        data = f'{user.pk}, {pk}, {course_price}, {user_balance}'
+        
         return Response(
             data=data,
             status=status.HTTP_201_CREATED

@@ -83,7 +83,6 @@ class Subscription(models.Model):
     - user (ForeignKey): Пользователь, связанный с подпиской.
     - course (ForeignKey): Курс, на который оформлена подписка.
     - subscription_date (DateTimeField): Дата и время создания подписки.
-    - group (OneToOneField): Группа, связанная с подпиской.
     """
 
     user = models.ForeignKey(
@@ -102,17 +101,10 @@ class Subscription(models.Model):
         auto_now_add=True,
         verbose_name='Дата подписки'
     )
-    group = models.OneToOneField(
-        'courses.Group',
-        related_name='subscriptions',
-        on_delete=models.CASCADE,
-        verbose_name='Группа',
-        null=True
-    )
     
     user: 'models.ForeignKey[CustomUser]'
     course: 'models.ForeignKey[Course]'
-    group: 'models.OneToOneField[Group] | models.OneToOneField[None]'
+    groups: 'models.QuerySet[Group]'
 
     class Meta:
         verbose_name = 'Подписка'
@@ -121,3 +113,22 @@ class Subscription(models.Model):
 
     def __str__(self):
         return f"{self.user.username} подписан на {self.course.title}"
+
+
+class SubscriptionGroup(models.Model):
+    
+    subscription = models.ForeignKey(
+        'users.Subscription',
+        related_name='subscriptions_group',
+        on_delete=models.CASCADE,
+        verbose_name='Подписка'
+    )
+    group = models.ForeignKey(
+        'courses.Group',
+        related_name='subscriptions_group',
+        on_delete=models.CASCADE,
+        verbose_name='Группа'
+    )
+    
+    def __str__(self):
+        return f"{self.subscription} записан в группу {self.group.title}"

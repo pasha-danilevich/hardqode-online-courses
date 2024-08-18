@@ -22,6 +22,7 @@ from django.db import transaction
 from django.db.models import F
 from rest_framework.response import Response
 from rest_framework import status
+from django.contrib.auth.models import AnonymousUser
 
 
 class LessonViewSet(viewsets.ModelViewSet):
@@ -71,6 +72,7 @@ class GroupViewSet(viewsets.ModelViewSet):
 
 class CourseViewSet(viewsets.ModelViewSet):
     """Курсы """
+    permission_classes = (ReadOnlyOrIsAdmin,)
 
     queryset = Course.objects.prefetch_related(
         Prefetch(
@@ -79,7 +81,20 @@ class CourseViewSet(viewsets.ModelViewSet):
         )
     ).all()
 
-    permission_classes = (ReadOnlyOrIsAdmin,)
+    def get_queryset(self):
+        user = self.request.user  
+        
+        if isinstance(user, AnonymousUser):
+            return self.queryset
+
+        queryset = self.queryset.filter(
+            available=True  # Флаг доступности
+        ).exclude(
+            subscriptions__user=user  # Исключаем курсы, на которые подписан пользователь
+        )
+        print(queryset)
+
+        return queryset
 
     def get_serializer_class(self):
         if self.action in ['list', 'retrieve']:

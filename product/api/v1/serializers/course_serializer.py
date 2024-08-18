@@ -50,7 +50,7 @@ class StudentSerializer(serializers.ModelSerializer):
 class GroupSerializer(serializers.ModelSerializer):
     """Список групп."""
 
-    # TODO Доп. задание
+    # TODO Доп. задание (не понял задание)
 
     class Meta:
         model = Group
